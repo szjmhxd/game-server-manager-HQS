@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>配置文件列表</h2>
+
+{% if session['user_id'] == 1 %}
+<a href="{{ url_for('views.manage_permissions') }}" class="btn">权限管理</a>
+<a href="{{ url_for('views.add_user') }}" class="btn">新增用户</a>
+<a href="{{ url_for('views.add_config') }}" class="btn">新增配置文件</a>
+{% endif %}
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>类型</th>
+            <th>UUID</th>
+            <th>名称</th>
+            <th>版本</th>
+            <th>路径</th>
+            <th>备注</th>
+            <th>创建时间</th>
+            <th>更新时间</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cfg in files %}
+        <tr>
+            <td>{{ cfg['id'] }}</td>
+            <td>{{ cfg['type'] }}</td>
+            <td>{{ cfg['uuid'] }}</td>
+            <td>{{ cfg['name'] }}</td>
+            <td>{{ cfg['version'] }}</td>
+            <td>{{ cfg['path'] }}</td>
+            <td>{{ cfg['remark'] }}</td>
+            <td>{{ cfg['created_time'] }}</td>
+            <td>{{ cfg['updated_time'] }}</td>
+            <td>
+                {% if session['user_id'] == 1 %}
+                <a href="{{ url_for('views.edit_config', file_id=cfg['id']) }}">编辑</a> |
+                <a href="{{ url_for('views.delete_config', file_id=cfg['id']) }}"
+                    onclick="return confirm('确定删除吗？')">删除</a>
+
+                {% endif %}
+
+                <a href="{{ url_for('views.edit_content', file_id=cfg['id']) }}">编辑内容</a> |
+
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

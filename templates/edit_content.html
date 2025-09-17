@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>编辑配置文件内容：{{ file['name'] }}</h2>
+
+<form method="post" action="{{ url_for('views.edit_content', file_id=file['id']) }}">
+    <!-- 顶部自定义字段 -->
+
+    
+                    {% if session['user_id'] == 1 %}
+    <div class="form-group">
+        <label>gmWebResURL：</label>
+        <input type="text" name="gmWebResURL" value="{{ config.get('gmWebResURL', '') }}">
+    </div>
+    <div class="form-group">
+        <label>gmInitResURL：</label>
+        <input type="text" name="gmInitResURL" value="{{ config.get('gmInitResURL', '') }}">
+    </div>
+
+                {% endif %}
+
+    <h3>服务器数据 (serverData)</h3>
+    <div style="margin-bottom: 10px;">
+        <button type="button" onclick="addServerRow()" class="btn" style="background-color: #28a745;">新增服务器</button>
+    </div>
+    <table class="table" id="serverTable">
+        <thead>
+            <tr>
+                <th>srvid</th>
+                <th>srvname</th>
+                <th>srvip</th>
+                <th>port</th>
+                <th>urlsuffix</th>
+                <th>state</th>
+                <th>tag</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="serverTableBody">
+            {% for srv in config.get('serverData', []) %}
+            <tr>
+                <td><input type="text" name="srvid_{{ loop.index0 }}" value="{{ srv.get('srvid', '') }}"></td>
+                <td><input type="text" name="srvname_{{ loop.index0 }}" value="{{ srv.get('srvname', '') }}"></td>
+                <td><input type="text" name="srvip_{{ loop.index0 }}" value="{{ srv.get('srvip', '') }}"></td>
+                <td><input type="text" name="port_{{ loop.index0 }}" value="{{ srv.get('port', '') }}"></td>
+                <td><input type="text" name="urlsuffix_{{ loop.index0 }}" value="{{ srv.get('urlsuffix', '') }}"></td>
+                <td><input type="text" name="state_{{ loop.index0 }}" value="{{ srv.get('state', '') }}"></td>
+                <td><input type="text" name="tag_{{ loop.index0 }}" value="{{ srv.get('tag', '') }}"></td>
+                <td><button type="button" onclick="removeServerRow(this)" class="btn" style="background-color: #dc3545; padding: 4px 8px;">删除</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn">保存修改</button>
+    <a href="{{ url_for('views.index') }}" class="btn">返回</a>
+</form>
+
+<script>
+let serverRowIndex = {{ config.get('serverData', [])|length }};
+
+function addServerRow() {
+    const tbody = document.getElementById('serverTableBody');
+    const row = document.createElement('tr');
+    
+    row.innerHTML = `
+        <td><input type="text" name="srvid_${serverRowIndex}" value=""></td>
+        <td><input type="text" name="srvname_${serverRowIndex}" value=""></td>
+        <td><input type="text" name="srvip_${serverRowIndex}" value=""></td>
+        <td><input type="text" name="port_${serverRowIndex}" value=""></td>
+        <td><input type="text" name="urlsuffix_${serverRowIndex}" value=""></td>
+        <td><input type="text" name="state_${serverRowIndex}" value=""></td>
+        <td><input type="text" name="tag_${serverRowIndex}" value=""></td>
+        <td><button type="button" onclick="removeServerRow(this)" class="btn" style="background-color: #dc3545; padding: 4px 8px;">删除</button></td>
+    `;
+    
+    tbody.appendChild(row);
+    serverRowIndex++;
+}
+
+function removeServerRow(button) {
+    const row = button.closest('tr');
+    row.remove();
+}
+</script>
+{% endblock %}

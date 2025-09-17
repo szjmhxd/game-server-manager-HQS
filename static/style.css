@@ -1,0 +1,123 @@
+/* 全局样式 */
+body {
+    font-family: "Microsoft YaHei", Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+/* 顶部导航栏 */
+.navbar {
+    background-color: #2c3e50;
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    margin-left: 15px;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
+
+/* 页面容器 */
+.container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* 消息提示 */
+.flash-messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+}
+
+.flash-messages li {
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+.flash-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.flash-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.flash-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* 表单 */
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="password"],
+textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* 按钮 */
+.btn {
+    display: inline-block;
+    padding: 8px 14px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #2980b9;
+}
+
+/* 表格 */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.table th,
+.table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.table th {
+    background-color: #f1f1f1;
+}
