@@ -38,4 +38,4 @@ Thumbs.db
 err_return/
 
 # 忽略批处理文件（可选，取决于是否需要版本控制）
-*.bat
+# *.bat
