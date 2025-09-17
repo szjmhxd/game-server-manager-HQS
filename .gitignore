@@ -1,0 +1,41 @@
+# 忽略logs目录下的所有内容
+logs/
+
+# 忽略所有.log后缀的文件
+*.log
+
+# 忽略.git目录（通常git会自动处理，但为了完整性添加）
+.git/
+
+# 忽略数据库文件
+data.db
+
+# 忽略Python编译文件和缓存目录
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 忽略环境变量配置文件
+.env
+
+# 忽略IDE配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 忽略操作系统文件
+.DS_Store
+Thumbs.db
+
+# 忽略临时文件
+*.tmp
+*.temp
+.cache/
+
+# 忽略错误返回目录
+err_return/
+
+# 忽略批处理文件（可选，取决于是否需要版本控制）
+*.bat
