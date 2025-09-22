@@ -183,12 +183,12 @@ def edit_content(file_id):
 
         print(f"文件内容长度: {len(content)} 字符")
         print(f"文件内容前100字符: {content[:100]}")
-        
-                # 检查并移除UTF-8 BOM（如果存在）
-        if content.startswith('\ufeff'):
+
+        # 检查并移除UTF-8 BOM（如果存在）
+        if content.startswith("\ufeff"):
             content = content[1:]
             print("已移除UTF-8 BOM标记")
-            
+
         config_data = json.loads(content)
         print("JSON解析成功")
 
@@ -255,7 +255,21 @@ def edit_content(file_id):
 
         return redirect(url_for("views.index"))
 
-    return render_template("edit_content.html", file=file, config=config_data)
+    # 获取当前用户的权限信息
+    user_id = session.get("user_id")
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("SELECT permission FROM users WHERE id=?", (user_id,))
+    user_row = c.fetchone()
+    user_permission = user_row[0] if user_row else 0
+    conn.close()
+
+    return render_template(
+        "edit_content.html",
+        file=file,
+        config=config_data,
+        user_permission=user_permission,
+    )
 
 
 # @views_bp.route('/manage_permissions', methods=['GET', 'POST'])
@@ -364,8 +378,10 @@ def manage_permissions():
     db = get_db_connection()
     cursor = db.cursor()
 
-    # 查询所有用户和配置文件
-    cursor.execute("SELECT id, username FROM users WHERE delete_time IS NULL")
+    # 查询所有用户和配置文件（包含permission字段）
+    cursor.execute(
+        "SELECT id, username, permission FROM users WHERE delete_time IS NULL"
+    )
     users = cursor.fetchall()
     cursor.execute("SELECT id, name FROM config_files WHERE delete_time IS NULL")
     config_files = cursor.fetchall()
@@ -376,21 +392,51 @@ def manage_permissions():
     if request.method == "POST":
         selected_user_id = int(request.form.get("user_id", selected_user_id))
         action = request.form.get("action")
-        if action == "save":
+
+        if action == "save_all":
+            # 获取当前用户ID和修改权限
+            current_user_id = int(request.form.get("current_user_id"))
+            new_permission = int(request.form.get("permission"))
+
+            # 保存修改权限
+            cursor.execute(
+                "UPDATE users SET permission = ? WHERE id = ?",
+                (new_permission, current_user_id),
+            )
+
+            # 保存配置文件访问权限
             config_file_ids = request.form.getlist("config_file_ids")
-            # 先删除该用户所有权限
+            # 先删除该用户所有访问权限
             cursor.execute(
                 "DELETE FROM user_config_permissions WHERE user_id=?",
-                (selected_user_id,),
+                (current_user_id,),
             )
-            # 再插入新权限
+            # 再插入新的访问权限
             for cfid in config_file_ids:
                 cursor.execute(
                     "INSERT INTO user_config_permissions (user_id, config_file_id) VALUES (?, ?)",
-                    (selected_user_id, int(cfid)),
+                    (current_user_id, int(cfid)),
                 )
+
             db.commit()
-            flash("权限已更新")
+            flash("所有权限设置已更新")
+
+            # 重新查询用户以获取更新后的权限
+            cursor.execute(
+                "SELECT id, username, permission FROM users WHERE delete_time IS NULL"
+            )
+            users = cursor.fetchall()
+
+            # 重新查询用户权限
+            user_permissions = {}
+            for user in users:
+                cursor.execute(
+                    "SELECT config_file_id FROM user_config_permissions WHERE user_id=?",
+                    (user[0],),
+                )
+                user_permissions[user[0]] = set(row[0] for row in cursor.fetchall())
+
+        # 切换用户的逻辑保持不变
         # 如果是切换用户（action == 'switch'），什么都不做，只回显
 
     elif request.method == "GET":
@@ -459,6 +505,7 @@ def read_file_content(path):
             return None, str(e)
     return None, "无法使用任何编码读取文件"
 
+
 @views_bp.route("/api/config/<string:file_id>", methods=["GET"])
 def public_get_config(file_id):
     user_agent = request.headers.get("User-Agent", "")
@@ -477,17 +524,29 @@ def public_get_config(file_id):
         if not user_agent.startswith("Dalvik"):
             # type为qu或找不到都返回qu，否则返回modlist
             if not row or row.get("type") == "qu":
-                qu_path = os.path.join(os.path.dirname(__file__), "err_return", "qu.txt")
+                qu_path = os.path.join(
+                    os.path.dirname(__file__), "err_return", "qu.txt"
+                )
                 content, err = read_file_content(qu_path)
                 if content:
-                    return content, 200, {"Content-Type": "application/json; charset=utf-8"}
+                    return (
+                        content,
+                        200,
+                        {"Content-Type": "application/json; charset=utf-8"},
+                    )
                 else:
                     return "qu文件读取失败: " + (err or ""), 500
             else:
-                modlist_path = os.path.join(os.path.dirname(__file__), "err_return", "modlist.txt")
+                modlist_path = os.path.join(
+                    os.path.dirname(__file__), "err_return", "modlist.txt"
+                )
                 content, err = read_file_content(modlist_path)
                 if content:
-                    return content, 200, {"Content-Type": "application/json; charset=utf-8"}
+                    return (
+                        content,
+                        200,
+                        {"Content-Type": "application/json; charset=utf-8"},
+                    )
                 else:
                     return "modlist文件读取失败: " + (err or ""), 500
         # User-Agent 符合时，直接404
@@ -505,7 +564,9 @@ def public_get_config(file_id):
             else:
                 return "qu文件读取失败: " + (err or ""), 500
         else:
-            modlist_path = os.path.join(os.path.dirname(__file__), "err_return", "modlist.txt")
+            modlist_path = os.path.join(
+                os.path.dirname(__file__), "err_return", "modlist.txt"
+            )
             content, err = read_file_content(modlist_path)
             if content:
                 return content, 200, {"Content-Type": "application/json; charset=utf-8"}
