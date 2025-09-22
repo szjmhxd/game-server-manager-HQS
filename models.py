@@ -23,6 +23,7 @@ def init_db():
         id           INTEGER PRIMARY KEY AUTOINCREMENT,
         username     TEXT UNIQUE NOT NULL,
         password     TEXT NOT NULL,
+        permission   INTEGER DEFAULT 0,  -- 0表示没权限，1表示有权限
         created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         delete_time  TIMESTAMP DEFAULT NULL
@@ -46,7 +47,7 @@ def init_db():
     CREATE TABLE IF NOT EXISTS config_files (
         id           INTEGER PRIMARY KEY AUTOINCREMENT,
         uuid         TEXT UNIQUE,  -- 新增uuid字段
-        type         TEXT NOT NULL,  -- 新增类型字段，值为qu或modlist
+        type         TEXT NOT NULL,  -- 新增类型字段 值为qu或modlist
         name         TEXT NOT NULL,
         version      TEXT NOT NULL,
         path         TEXT NOT NULL,
@@ -119,8 +120,8 @@ CREATE TABLE IF NOT EXISTS user_config_permissions (
     c.execute("SELECT * FROM users WHERE username = ?", ("admin",))
     if not c.fetchone():
         c.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)",
-            ("admin", generate_password_hash("admin123"))
+            "INSERT INTO users (username, password, permission) VALUES (?, ?, ?)",
+            ("admin", generate_password_hash("admin123"), 1)
         )
 
     conn.commit()
