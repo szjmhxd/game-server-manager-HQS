@@ -18,7 +18,8 @@ def init_db():
     c = conn.cursor()
 
     # 创建 users 表
-    c.execute("""
+    c.execute(
+        """
     CREATE TABLE IF NOT EXISTS users (
         id           INTEGER PRIMARY KEY AUTOINCREMENT,
         username     TEXT UNIQUE NOT NULL,
@@ -28,10 +29,12 @@ def init_db():
         updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         delete_time  TIMESTAMP DEFAULT NULL
     )
-    """)
+    """
+    )
 
     # users 表触发器
-    c.execute("""
+    c.execute(
+        """
     CREATE TRIGGER IF NOT EXISTS set_users_updated_time
     AFTER UPDATE ON users
     FOR EACH ROW
@@ -40,10 +43,12 @@ def init_db():
         SET updated_time = CURRENT_TIMESTAMP
         WHERE id = OLD.id;
     END;
-    """)
+    """
+    )
 
     # 创建 config_files 表
-    c.execute("""
+    c.execute(
+        """
     CREATE TABLE IF NOT EXISTS config_files (
         id           INTEGER PRIMARY KEY AUTOINCREMENT,
         uuid         TEXT UNIQUE,  -- 新增uuid字段
@@ -56,10 +61,12 @@ def init_db():
         updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         delete_time  TIMESTAMP DEFAULT NULL
     )
-    """)
+    """
+    )
 
     # config_files 表触发器
-    c.execute("""
+    c.execute(
+        """
     CREATE TRIGGER IF NOT EXISTS set_config_files_updated_time
     AFTER UPDATE ON config_files
     FOR EACH ROW
@@ -68,20 +75,24 @@ def init_db():
         SET updated_time = CURRENT_TIMESTAMP
         WHERE id = OLD.id;
     END;
-    """)
+    """
+    )
 
     # 创建 column_comments 表
-    c.execute("""
+    c.execute(
+        """
     CREATE TABLE IF NOT EXISTS column_comments (
         table_name  TEXT NOT NULL,
         column_name TEXT NOT NULL,
         comment     TEXT,
         PRIMARY KEY (table_name, column_name)
     )
-    """)
+    """
+    )
 
-        # 创建 user_config_permissions 表 权限表
-    c.execute("""
+    # 创建 user_config_permissions 表 权限表
+    c.execute(
+        """
 CREATE TABLE IF NOT EXISTS user_config_permissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
@@ -90,7 +101,8 @@ CREATE TABLE IF NOT EXISTS user_config_permissions (
     FOREIGN KEY(user_id) REFERENCES users(id),
     FOREIGN KEY(config_file_id) REFERENCES config_files(id)
 );
-    """)
+    """
+    )
 
     # 插入默认字段注释（只在表为空时插入一次）
     c.execute("SELECT COUNT(*) FROM column_comments")
@@ -113,7 +125,7 @@ CREATE TABLE IF NOT EXISTS user_config_permissions (
         ]
         c.executemany(
             "INSERT INTO column_comments (table_name, column_name, comment) VALUES (?, ?, ?)",
-            comments
+            comments,
         )
 
     # 创建默认管理员账号
@@ -121,7 +133,7 @@ CREATE TABLE IF NOT EXISTS user_config_permissions (
     if not c.fetchone():
         c.execute(
             "INSERT INTO users (username, password, permission) VALUES (?, ?, ?)",
-            ("admin", generate_password_hash("admin123"), 1)
+            ("admin", generate_password_hash("admin123"), 1),
         )
 
     conn.commit()
