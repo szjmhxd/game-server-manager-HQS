@@ -206,6 +206,7 @@ def edit_content(file_id):
         # 更新热更地址
         config_data["gmWebResURL"] = request.form.get("gmWebResURL", "")
         config_data["gmInitResURL"] = request.form.get("gmInitResURL", "")
+        config_data["gmResURL"] = request.form.get("gmResURL", "")
 
         # 重新构建 serverData
         new_server_data = []
