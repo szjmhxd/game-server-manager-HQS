@@ -204,9 +204,17 @@ def edit_content(file_id):
 
     if request.method == "POST":
         # 更新热更地址
-        config_data["gmWebResURL"] = request.form.get("gmWebResURL", "")
-        config_data["gmInitResURL"] = request.form.get("gmInitResURL", "")
-        config_data["gmResURL"] = request.form.get("gmResURL", "")
+        gm_web_res_url = request.form.get("gmWebResURL")
+        if gm_web_res_url is not None:
+            config_data["gmWebResURL"] = gm_web_res_url
+            
+        gm_init_res_url = request.form.get("gmInitResURL")
+        if gm_init_res_url is not None:
+            config_data["gmInitResURL"] = gm_init_res_url
+            
+        gm_res_url = request.form.get("gmResURL")
+        if gm_res_url is not None:
+            config_data["gmResURL"] = gm_res_url
 
         # 重新构建 serverData
         new_server_data = []
